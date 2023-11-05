@@ -1,0 +1,340 @@
+create user dbmsproject identified by oat;
+grant all privileges to dbmsproject;
+grant create session to dbmsproject;
+connect dbmsproject/oat
+set linesize 500;
+
+======================================= Table =======================================
+------------------------------------ movies Table ------------------------------------
+create table movies
+(
+movie_id int PRIMARY KEY,
+movie_name varchar2(30) NOT NULL,
+category varchar2(15),
+duration_of_movie float,
+ratings float
+);
+
+
+------------------------------- theatre_details Table -------------------------------
+create table theatre_details
+(
+theatre_id int UNIQUE,
+theatre_name varchar2(30) PRIMARY KEY,
+theatre_loc varchar2(15),
+ratings float
+);
+
+
+-------------------------------- movie_timings Table --------------------------------
+create table movie_timings
+(
+theatre_name varchar2(30),
+movie_id int,
+show1_time float,
+show2_time float,
+show3_time float,
+constraint fk_mov
+foreign key(movie_id) references movies(movie_id),
+foreign key(theatre_name) references theatre_details(theatre_name)
+);
+
+
+---------------------------------- movie_cast Table ----------------------------------
+create table ticket
+(
+movie_id int,
+ticket_id int,
+theatre_name varchar2(30),
+showtime float,
+no_of_tickets int,
+cost_per_ticket int,
+total_cost int,
+constraint fk_tic
+foreign key(movie_id) references movies(movie_id),
+foreign key(theatre_name) references theatre_details(theatre_name)
+);
+
+
+
+
+===================================== Insertion =====================================
+-------------------------------- insert movies Table --------------------------------
+insert into movies values(0312,'Thor:Love and Thunder','Action',1.59,8.2);
+insert into movies values(0801,'Top Gun: Maverick','Action',2.11,8.5);
+insert into movies values(0612,'Jujutsu Kaisen','Anime',1.45,8.6);
+insert into movies values(1609,'Bullet Train','Action',2.6,8.1);
+insert into movies values(0112,'Minions: The Rise of Gru','Animation',1.30,7.9);
+insert into movies values(0109,'De Dhakka 2','Marathi',2.1,6.9);
+insert into movies values(3103,'Liger','Drama',2.20,8.0);
+insert into movies values(6969,'Baba Rajak Returns','Biography',4.10,9.2);
+
+select * from movies;
+
+
+---------------------------- insert theatre_details Table ----------------------------
+insert into theatre_details values(1,'Movietime: Cubic Mall', 'Chembur', 7.9);
+insert into theatre_details values(2,'IMAX', 'Wadala', 8.4);
+insert into theatre_details values(3,'INOX: R-City', 'Ghatkopar', 8.9);
+insert into theatre_details values(4,'PVR: Market City', 'Kurla', 8.0);
+insert into theatre_details values(5,'Nataraj Cinema', 'Chembur', 9.9);
+
+select * from theatre_details;
+
+
+----------------------------- insert movie_timings Table -----------------------------
+insert into movie_timings values('Movietime: Cubic Mall', 0312, 07.35, 16.42, 21.11);
+insert into movie_timings values('IMAX', 0312, 11.35, 15.35, 21.15);
+insert into movie_timings values('INOX: R-City', 0312, 08.35, 13.25, 17.45);
+insert into movie_timings values('PVR: Market City', 0312, 11.23, 17.25, 22.23);
+
+insert into movie_timings values('Movietime: Cubic Mall', 0801, 08.25, 14.47, 18.12);
+insert into movie_timings values('IMAX', 0801, 09.01, 13.31, 20.01);
+insert into movie_timings values('INOX: R-City', 0801, 07.52, 12.07, 14.35);
+insert into movie_timings values('PVR: Market City', 0801, 09.39, 11.45, 14.53);
+
+insert into movie_timings values('INOX: R-City', 0612, 11.55, NULL, 21.37);
+
+insert into movie_timings values('IMAX', 1609, NULL, 17.33, NULL);
+insert into movie_timings values('PVR: Market City', 1609, NULL, 19.25, 20.22);
+
+insert into movie_timings values('Movietime: Cubic Mall', 0112, NULL, 14.45, 19.07);
+insert into movie_timings values('IMAX', 0112, NULL, 14.35, 22.18);
+insert into movie_timings values('INOX: R-City', 0112, 10.32, NULL, 18.15);
+insert into movie_timings values('PVR: Market City', 0112, NULL, NULL, 18.04);
+
+insert into movie_timings values('IMAX', 0109, NULL, NULL, 21.45);
+
+insert into movie_timings values('Movietime: Cubic Mall', 3103, 10.45, 13.34, 17.06);
+insert into movie_timings values('IMAX', 3103, 11.01, 14.03, 18.60);
+insert into movie_timings values('INOX: R-City', 3103, 10.52, 13.03, 15.32);
+insert into movie_timings values('PVR: Market City', 3103, 10.32, 12.45, 16.24);
+
+insert into movie_timings values('Nataraj Cinema', 6969, 09.01, NULL, 23.31);
+
+select * from movie_timings;
+
+
+-------------------------------- insert ticket Table --------------------------------
+insert into ticket values(0312, 2201, 'IMAX', 21.10, 2, 110, 220);
+insert into ticket values(1609, 1635, 'PVR: Market City', 19.25, 1, 150, 150);
+insert into ticket values(0109, 7912, 'IMAX', 21.40, 8, 100, 800);
+insert into ticket values(3103, 3434, 'Movietime: Cubic Mall', 10.45, 3, 123, 369);
+insert into ticket values(6969, 4200, 'Nataraj Cinema', 09.00, 13, 69, 897);
+
+select * from ticket;
+
+
+
+
+======================================== View ========================================
+-------------------------------- ticket_details View ---------------------------------
+No. of Tickets booked from our app til now
+
+create view ticket_details
+as
+select tt.movie_id,m.movie_name,tt.theatre_name,tt.showtime,tt.no_of_tickets,tt.total_cost
+from movies m, ticket tt
+where m.movie_id = tt.movie_id;
+
+select * from ticket_details;
+
+
+
+
+====================================== Queries ======================================
+1.) Display/Searching the Movie Name (E.g. Liger)
+
+select * from movies
+where movie_name like '%&_%';
+
+--------------------------------------------------------------------------------------
+
+2.) To check movie timings of a particular movie (E.g. Liger)
+
+select movie_name,theatre_name,show1_time,show2_time,show3_time
+from movies
+join
+movie_timings on movies.movie_id = movie_timings.movie_id
+where movies.movie_id = 3103;
+
+--------------------------------------------------------------------------------------
+
+3.) Highest/Cheapest Priced Ticket Movie (SUBQUERY)
+
+select movie_id, movie_name, theatre_name, (total_cost/no_of_tickets) as "Expensive Ticket" from ticket_details
+where total_cost/no_of_tickets = (select max(total_cost/no_of_tickets) from ticket_details);
+
+select movie_id, movie_name, theatre_name, (total_cost/no_of_tickets) as "Cheapest Ticket" from ticket_details
+where total_cost/no_of_tickets = (select min(total_cost/no_of_tickets) from ticket_details);
+
+--------------------------------------------------------------------------------------
+
+4.) Number of movies each theatre shows everyday
+
+select theatre_name, count(theatre_name) as "No. of Movies" from movie_timings
+group by theatre_name;
+
+--------------------------------------------------------------------------------------
+
+5.) Which Marathi Movie is on theatres right now?
+
+select m.movie_name, t.theatre_name, t.movie_id, t.show1_time, t.show2_time, t.show3_time
+from movies m, movie_timings t
+where m.movie_id = t.movie_id
+AND
+m.category = 'Marathi';
+
+--------------------------------------------------------------------------------------
+
+6.) I want to watch the new Superhit movie 'Baba Rajak Returns' in my locality 'Chembur'. To check,
+
+select m.movie_id,m.movie_name, t.theatre_name, t.show1_time, t.show2_time, t.show3_time
+from movies m, movie_timings t, theatre_details td
+where m.movie_id = t.movie_id
+AND
+td.theatre_name = t.theatre_name
+AND
+m.movie_name = 'Baba Rajak Returns'
+AND
+td.theatre_loc = 'Chembur';
+
+--------------------------------------------------------------------------------------
+
+7.) I'm in R-City right now. Which movie should I watch?
+
+select m.movie_id, m.movie_name, t.show1_time, t.show2_time, t.show3_time
+from movies m, movie_timings t
+where m.movie_id=t.movie_id
+AND
+t.theatre_name like '%R-City%';
+
+--------------------------------------------------------------------------------------
+
+8.) Which movie has top/low grossing (by ratings) right now?
+
+select * from movies
+where ratings = (select max(ratings) from movies);
+
+select * from movies
+where ratings = (select min(ratings) from movies);
+
+--------------------------------------------------------------------------------------
+
+9.) Me and my friends plan to watch 'Thor: Love and Thunder after the lectures (till 4:10), is there any show available in any theatre between 4:30PM and 7:00PM?
+
+select m.movie_id, m.movie_name, t.theatre_name, t.show2_time as "Afternoon Timing"
+from movies m, movie_timings t
+where m.movie_id=t.movie_id
+AND
+show2_time >= 16.30 AND show2_time <= 21.00
+AND
+m.movie_name = 'Thor:Love and Thunder';
+
+--------------------------------------------------------------------------------------
+
+10.) Theatres are increasing the price of tickets by Rs. 50 during Weekends. :(
+
+create or replace procedure weekend
+as
+weekday varchar2(10);
+temp char(10);
+begin
+select to_char(SYSDATE,'Day') into weekday from dual;
+dbms_output.put_line('Today is ' || weekday);
+temp := weekday;
+IF (temp = 'Sunday' OR temp = 'Saturday') THEN
+update ticket
+set cost_per_ticket = cost_per_ticket + 50;
+update ticket
+set total_cost = cost_per_ticket * no_of_tickets;
+dbms_output.put_line('Ticket Price are updated, Check out!');
+ELSE
+dbms_output.put_line('No changes in Ticket Price today.');
+END IF;
+end;
+/
+
+begin
+weekend;
+end;
+/
+
+select * from ticket;
+
+--------------------------------------------------------------------------------------
+
+11.) Booking a new Ticket using PL/SQL
+
+select * from movies;
+
+declare
+name varchar2(15) := '&name';
+movie varchar2(30) := '&movie';
+mid int;
+tid int;
+theatre varchar2(30) := '&theatre';
+st float;
+no_of_tickets int := '&no_of_tickets';
+cpt int;
+tc int;
+begin
+IF (movie = 'Thor:Love and Thunder') THEN
+mid := 0312;
+tid := 7867;
+st := 16.42;
+cpt := 110;
+ELSIF (movie = 'Top Gun: Maverick') THEN
+mid := 0801;
+tid := 5463;
+st := 09.01;
+cpt := 120;
+ELSIF (movie = 'Jujutsu Kaisen') THEN
+mid := 0612;
+tid := 3452;
+st := 21.37;
+cpt := 133;
+ELSIF (movie = 'Bullet Train') THEN
+mid := 1609;
+tid := 1265;
+st := 17.33;
+cpt := 150;
+ELSIF (movie = 'Minions: The Rise of Gru') THEN
+mid := 0112;
+tid := 8953;
+st := 10.32;
+cpt := 120;
+ELSIF (movie = 'De Dhakka 2') THEN
+mid := 0109;
+tid := 4523;
+st := 21.45;
+cpt := 100;
+ELSIF (movie = 'Liger') THEN
+mid := 3103;
+tid := 3342;
+st := 13.03;
+cpt := 123;
+ELSIF (movie = 'Baba Rajak Returns') THEN
+mid := 6969;
+tid := 4203;
+st := 23.31;
+cpt := 69;
+END IF;
+tc := cpt * no_of_tickets;
+insert into ticket values(mid, tid, theatre, st, no_of_tickets, cpt, tc);
+dbms_output.put_line(name || ', your ticket has been confirmed!');
+dbms_output.put_line('Your Ticket ID: ' || tid);
+dbms_output.put_line('See you in theatres :)');
+end;
+/
+
+==================================== Select Table ====================================
+select * from movies;
+select * from theatre_details;
+select * from movie_timings;
+select * from ticket;
+
+select * from ticket_details;
+
+select * from movie_timings
+order by theatre_name;
